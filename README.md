@@ -15,7 +15,7 @@ Right now it supports only basic operations.
 ```
 
 ### Installation:
-Download the latest release [here](/releases/latest)
+Download the latest release [here](https://github.com/Rawnly/git-select/releases/latest)
 
 ### Features
 - [x] Checkout branch via interactive prompt
