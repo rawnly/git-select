@@ -15,7 +15,9 @@ Right now it supports only basic operations.
 ```
 
 ### Installation:
-Download the latest release [here](https://github.com/Rawnly/git-select/releases/latest)
+1. Download the latest release [here](https://github.com/Rawnly/git-select/releases/latest)
+2. Move the binary in your `$PATH`
+3. Enjoy via `git select [flags|branch]`
 
 ### Features
 - [x] Checkout branch via interactive prompt
