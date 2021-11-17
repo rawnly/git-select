@@ -1,4 +1,4 @@
-module github.com/rawnly/git-checkout
+module github.com/rawnly/git-select
 
 go 1.17
 
