@@ -3,84 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/rawnly/git-select/git"
 	"os"
-	"os/exec"
-	"strings"
 )
 
-func gitBranch() ([]string, error) {
-	b, err := exec.Command("git", "branch").Output()
-
-	if err != nil {
-		return nil, err
-	}
-
-	output := string(b)
-
-	output = strings.ReplaceAll(output, "*", "")
-	output = strings.ReplaceAll(output, " ", "")
-
-	branchesList := filter(strings.Split(output, "\n"), func(item string, _ int) bool {
-		return len(strings.TrimSpace(item)) > 0
-	})
-
-	return branchesList, nil
-}
-
-func getCurrentBranch() string {
-	var currentbranch string
-	b, err := exec.Command("git", "branch").Output()
-
-	if err != nil {
-		return currentbranch
-	}
-
-	output := string(b)
-	output = strings.ReplaceAll(output, " ", "")
-
-	for _, b := range strings.Split(output, "\n") {
-		if strings.Contains(b, "*") {
-			currentbranch = b
-		}
-	}
-
-	return strings.ReplaceAll(currentbranch, "*", "")
-}
-
-func gitCheckout(branch string, createBranch bool) bool {
-	if branch == "" {
-		return false
-	}
-
-	if createBranch {
-		err := exec.Command("git", "checkout", "-b", branch).Run()
-
-		if err != nil {
-			return false
-		}
-	} else {
-		err := exec.Command("git", "checkout", branch).Run()
-
-		if err != nil {
-			return false
-		}
-	}
-
-
-	return true
-}
-
-func filter(arr []string, predicate func (item string, idx int) bool ) []string {
-	var filteredArr []string
-
-	for i, s := range arr {
-		if predicate(s, i) {
-			filteredArr = append(filteredArr, s)
-		}
-	}
-
-	return filteredArr
-}
 
 func main() {
 	args := os.Args[1:]
@@ -91,12 +17,12 @@ func main() {
 		if args[0] == "-b" {
 			branchToCheckout = args[1]
 
-			if gitCheckout(branchToCheckout, true) {
+			if git.Checkout(branchToCheckout, true) {
 				fmt.Printf("Switched to branch '%s'", branchToCheckout)
 				return
 			}
 		} else if branchToCheckout != "" {
-			if gitCheckout(branchToCheckout, false) {
+			if git.Checkout(branchToCheckout, false) {
 				fmt.Printf("Switched to branch '%s'", branchToCheckout)
 				return
 			}
@@ -104,7 +30,7 @@ func main() {
 	}
 
 
-	branches, err := gitBranch()
+	branches, err := git.Branch()
 
 	if err != nil {
 		panic(err)
@@ -117,7 +43,7 @@ func main() {
 			Prompt: &survey.Select{
 				Message: "Select a branch",
 				Options: branches,
-				Default: getCurrentBranch(),
+				Default: git.GetCurrentBranch(),
 			},
 		},
 	}
@@ -133,7 +59,7 @@ func main() {
 		return
 	}
 
-	gitCheckout(answ.Branch, false)
+	git.Checkout(answ.Branch, false)
 }
 
 
