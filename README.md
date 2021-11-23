@@ -1,6 +1,10 @@
 # Git Select
 > `git checkout` with ease
 
+<p align="center">
+    <img src="https://user-images.githubusercontent.com/16429579/143082185-4d0dcd19-6ae3-479e-9d1d-6a47f9f50149.png" />
+</p>
+
 This little tool improves UX of the `git checkout` command.
 Right now it supports only basic operations.
 
@@ -22,6 +26,7 @@ Right now it supports only basic operations.
 
 #### HomeBrew
 ```shell
+
     brew tap rawnly/tap
     brew install git-select
     
