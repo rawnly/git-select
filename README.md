@@ -19,6 +19,16 @@ Right now it supports only basic operations.
 2. Move the binary in your `$PATH`
 3. Enjoy via `git select [flags|branch]`
 
+
+#### HomeBrew
+```shell
+    brew tap rawnly/tap
+    brew install git-select
+    
+    # OR
+    brew install rawnly/tap/git-select
+```
+
 ### Features
 - [x] Checkout branch via interactive prompt
 - [x] Create and checkout a new branch
