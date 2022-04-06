@@ -10,6 +10,9 @@ builds:
     goos:
       - linux
       - darwin
+universal_binaries:
+  - replace: true
+    name_template: git-select
 archives:
   - replacements:
       darwin: Darwin

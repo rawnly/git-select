@@ -1,10 +1,10 @@
 package git
 
 import (
+	"github.com/ssoroka/slice"
 	"os/exec"
 	"strings"
 )
-
 
 func GetCurrentBranch() string {
 	var currentBranch string
@@ -25,6 +25,25 @@ func GetCurrentBranch() string {
 	return strings.ReplaceAll(currentBranch, "*", "")
 }
 
+func Commits() ([][]string, error) {
+	out, err := exec.Command("git", "log", "--all", "--oneline").Output()
+
+	if err != nil {
+		return nil, err
+	}
+
+	output := strings.TrimSpace(string(out))
+
+	commits := filter(strings.Split(output, "\n"), func(commit string, idx int) bool {
+		return len(commit) > 0
+	})
+
+	list := slice.Map[string, []string](commits, func(commit string) []string {
+		return strings.Split(commit, " ")
+	})
+
+	return list, nil
+}
 
 func Branch() ([]string, error) {
 	out, err := exec.Command("git", "branch").Output()
@@ -32,7 +51,6 @@ func Branch() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-
 
 	output := strings.ReplaceAll(string(out), "*", "")
 	output = strings.ReplaceAll(output, " ", "")
@@ -64,10 +82,8 @@ func Checkout(branch string, createBranch bool) bool {
 	return true
 }
 
-
-
-func filter(arr []string, predicate func (item string, idx int) bool ) []string {
-	var filteredArr []string
+func filter[T any](arr []T, predicate func(item T, idx int) bool) []T {
+	var filteredArr []T
 
 	for i, s := range arr {
 		if predicate(s, i) {
