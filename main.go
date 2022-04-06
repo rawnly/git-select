@@ -96,5 +96,11 @@ func main() {
 		return
 	}
 
-	git.Checkout(answer.Target, false)
+	target := answer.Target
+
+	if cli.Commits {
+		target = strings.Split(target, " ")[0]
+	}
+
+	git.Checkout(target, false)
 }
