@@ -1,6 +1,8 @@
 package git
 
 import (
+	"github.com/rawnly/git-select/array"
+	"github.com/rawnly/git-select/term"
 	"github.com/ssoroka/slice"
 	"os/exec"
 	"strings"
@@ -25,7 +27,7 @@ func GetCurrentBranch() string {
 	return strings.ReplaceAll(currentBranch, "*", "")
 }
 
-func Commits() ([][]string, error) {
+func Commits() (map[string]string, error) {
 	out, err := exec.Command("git", "log", "--all", "--oneline").Output()
 
 	if err != nil {
@@ -34,19 +36,25 @@ func Commits() ([][]string, error) {
 
 	output := strings.TrimSpace(string(out))
 
-	commits := filter(strings.Split(output, "\n"), func(commit string, idx int) bool {
+	commits := array.Filter(strings.Split(output, "\n"), func(commit string, idx int) bool {
 		return len(commit) > 0
 	})
 
-	list := slice.Map[string, []string](commits, func(commit string) []string {
-		return strings.Split(commit, " ")
+	commitMap := array.Reduce[string, map[string]string](commits, make(map[string]string), func(i int, acc map[string]string, commit string) map[string]string {
+		row := strings.Split(commit, " ")
+
+		id, message := slice.Shift(row)
+
+		acc[id] = strings.Join(message, " ")
+
+		return acc
 	})
 
-	return list, nil
+	return commitMap, nil
 }
 
 func Branch() ([]string, error) {
-	out, err := exec.Command("git", "branch").Output()
+	out, err := term.RunCommand("git", "branch")
 
 	if err != nil {
 		return nil, err
@@ -55,7 +63,7 @@ func Branch() ([]string, error) {
 	output := strings.ReplaceAll(string(out), "*", "")
 	output = strings.ReplaceAll(output, " ", "")
 
-	branchesList := filter(strings.Split(output, "\n"), func(item string, _ int) bool {
+	branchesList := array.Filter(strings.Split(output, "\n"), func(item string, _ int) bool {
 		return len(strings.TrimSpace(item)) > 0
 	})
 
@@ -68,28 +76,16 @@ func Checkout(branch string, createBranch bool) bool {
 	}
 
 	if createBranch {
-		if err := exec.Command("git", "checkout", "-b", branch).Run(); err != nil {
+		if err := term.RunOSCommand("git", "checkout", "-b", branch); err != nil {
 			return false
 		}
 
 		return true
 	}
 
-	if err := exec.Command("git", "checkout", branch).Run(); err != nil {
+	if err := term.RunOSCommand("git", "checkout", branch); err != nil {
 		return false
 	}
 
 	return true
-}
-
-func filter[T any](arr []T, predicate func(item T, idx int) bool) []T {
-	var filteredArr []T
-
-	for i, s := range arr {
-		if predicate(s, i) {
-			filteredArr = append(filteredArr, s)
-		}
-	}
-
-	return filteredArr
 }

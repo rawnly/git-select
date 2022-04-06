@@ -6,7 +6,6 @@ import (
 	"github.com/alecthomas/kong"
 	"github.com/mgutz/ansi"
 	"github.com/rawnly/git-select/git"
-	"github.com/ssoroka/slice"
 	"strings"
 )
 
@@ -46,11 +45,20 @@ func main() {
 		}
 	}
 
+	commitMap := make(map[string]string)
+
 	var qs []*survey.Question
 	if cli.Commits {
-		rawCommits, err := git.Commits()
+		rawMap, err := git.Commits()
 		if err != nil {
 			panic(err)
+		}
+
+		var commits []string
+
+		for k, message := range rawMap {
+			commitMap[highlight(k)] = k
+			commits = append(commits, fmt.Sprintf("%s %s", highlight(k), message))
 		}
 
 		qs = []*survey.Question{
@@ -58,11 +66,7 @@ func main() {
 				Name: "target",
 				Prompt: &survey.Select{
 					Message: "Select a commit",
-					Options: slice.Map[[]string, string](rawCommits, func(commit []string) string {
-						commitId, message := slice.Shift[string](commit)
-
-						return fmt.Sprintf("%s %s", highlight(commitId), strings.Join(message, " "))
-					}),
+					Options: commits,
 				},
 			},
 		}
@@ -99,7 +103,8 @@ func main() {
 	target := answer.Target
 
 	if cli.Commits {
-		target = strings.Split(target, " ")[0]
+		commitId := strings.Split(target, " ")[0]
+		target = commitMap[commitId]
 	}
 
 	git.Checkout(target, false)
